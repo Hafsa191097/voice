@@ -1,4 +1,3 @@
-
 import 'logger.dart';
 
 import 'dart:async';
@@ -17,17 +16,12 @@ enum AnimationType {
 }
 
 class VoiceCallScreen extends StatefulWidget {
-  final String baseUrl;
-  final String userId;
-  final String email;
   final AnimationType animationType;
 
   const VoiceCallScreen({
     super.key,
-    required this.baseUrl,
-    required this.userId,
-    required this.email,
-    this.animationType = AnimationType.particleSphere, // Default to particle sphere
+
+    this.animationType = AnimationType.particleSphere,
   });
 
   @override
@@ -47,15 +41,26 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
 
   // Colors matching Perplexity design
   static const Color _backgroundColor = Color(0xFF0D0D0D);
-  static const Color _listeningColor = Color(0xFFE8A54B); // Amber/Orange - User speaking/listening
-  static const Color _speakingColor = Color(0xFF4ECDC4); // Teal/Cyan - AI speaking
-  static const Color _connectingColor = Color(0xFF6B7280); // Gray - Connecting state
+  static const Color _listeningColor = Color(
+    0xFFE8A54B,
+  ); // Amber/Orange - User speaking/listening
+  static const Color _speakingColor = Color(
+    0xFF4ECDC4,
+  ); // Teal/Cyan - AI speaking
+  static const Color _connectingColor = Color(0xFF6B7280);
+  final _baseUrlController = TextEditingController(
+    text: 'https://456b11e89c92.ngrok-free.app',
+  );
+  final _userIdController = TextEditingController(
+    text: 'a7ef3cee-d7ad-4d9f-a024-d89982b14b1c',
+  );
+  final _emailController = TextEditingController(text: 'test@example.com');
 
   @override
   void initState() {
     super.initState();
 
-    _callManager = VoiceCallManager(baseUrl: widget.baseUrl);
+    _callManager = VoiceCallManager(baseUrl: _baseUrlController.text.trim());
 
     // Rotation for the sphere/lottie
     _rotationController = AnimationController(
@@ -90,8 +95,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
       }
 
       final authenticated = await _callManager.authenticate(
-        userId: widget.userId,
-        email: widget.email,
+        userId: _userIdController.text.trim(),
+        email: _emailController.text.trim(),
       );
 
       if (!authenticated) {
@@ -193,8 +198,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
           child: _isInitializing
               ? _buildLoadingView()
               : _initError != null
-                  ? _buildErrorView()
-                  : _buildMainView(),
+              ? _buildErrorView()
+              : _buildMainView(),
         ),
       ),
     );
@@ -206,10 +211,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
         gradient: RadialGradient(
           center: Alignment.center,
           radius: 1.0,
-          colors: [
-            _connectingColor.withOpacity(0.1),
-            _backgroundColor,
-          ],
+          colors: [_connectingColor.withOpacity(0.1), _backgroundColor],
         ),
       ),
       child: Center(
@@ -261,10 +263,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
         gradient: RadialGradient(
           center: Alignment.center,
           radius: 1.0,
-          colors: [
-            Colors.red.withOpacity(0.1),
-            _backgroundColor,
-          ],
+          colors: [Colors.red.withOpacity(0.1), _backgroundColor],
         ),
       ),
       child: Center(
@@ -318,7 +317,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     return Consumer<VoiceCallManager>(
       builder: (context, manager, _) {
         final stateColor = _getStateColor(manager.state);
-        final isActive = manager.state == VoiceCallState.listening ||
+        final isActive =
+            manager.state == VoiceCallState.listening ||
             manager.state == VoiceCallState.aiSpeaking ||
             manager.state == VoiceCallState.connected;
 
@@ -349,9 +349,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
                   const SizedBox(height: 80),
 
                   // Transcript area
-                  Expanded(
-                    child: _buildTranscriptArea(manager),
-                  ),
+                  Expanded(child: _buildTranscriptArea(manager)),
 
                   // Animation sphere
                   _buildAnimationSphere(manager),
@@ -373,7 +371,11 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
 
   Widget _buildSettingsButton(VoiceCallManager manager) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.settings_outlined, color: Colors.white54, size: 24),
+      icon: const Icon(
+        Icons.settings_outlined,
+        color: Colors.white54,
+        size: 24,
+      ),
       color: const Color(0xFF1A1A1A),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       itemBuilder: (context) => [
@@ -388,31 +390,33 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
             ),
           ),
         ),
-        ...VoiceOption.values.map((voice) => PopupMenuItem(
-              value: 'voice_${voice.apiName}',
-              child: Row(
-                children: [
-                  Icon(
-                    manager.selectedVoice == voice
-                        ? Icons.check_circle
-                        : Icons.circle_outlined,
-                    size: 18,
+        ...VoiceOption.values.map(
+          (voice) => PopupMenuItem(
+            value: 'voice_${voice.apiName}',
+            child: Row(
+              children: [
+                Icon(
+                  manager.selectedVoice == voice
+                      ? Icons.check_circle
+                      : Icons.circle_outlined,
+                  size: 18,
+                  color: manager.selectedVoice == voice
+                      ? _listeningColor
+                      : Colors.white38,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  voice.displayName,
+                  style: TextStyle(
                     color: manager.selectedVoice == voice
-                        ? _listeningColor
-                        : Colors.white38,
+                        ? Colors.white
+                        : Colors.white70,
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    voice.displayName,
-                    style: TextStyle(
-                      color: manager.selectedVoice == voice
-                          ? Colors.white
-                          : Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
-            )),
+                ),
+              ],
+            ),
+          ),
+        ),
         const PopupMenuDivider(),
         const PopupMenuItem(
           enabled: false,
@@ -425,31 +429,33 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
             ),
           ),
         ),
-        ...VoiceModel.values.map((model) => PopupMenuItem(
-              value: 'model_${model.apiName}',
-              child: Row(
-                children: [
-                  Icon(
-                    manager.selectedModel == model
-                        ? Icons.check_circle
-                        : Icons.circle_outlined,
-                    size: 18,
+        ...VoiceModel.values.map(
+          (model) => PopupMenuItem(
+            value: 'model_${model.apiName}',
+            child: Row(
+              children: [
+                Icon(
+                  manager.selectedModel == model
+                      ? Icons.check_circle
+                      : Icons.circle_outlined,
+                  size: 18,
+                  color: manager.selectedModel == model
+                      ? _listeningColor
+                      : Colors.white38,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  model.displayName,
+                  style: TextStyle(
                     color: manager.selectedModel == model
-                        ? _listeningColor
-                        : Colors.white38,
+                        ? Colors.white
+                        : Colors.white70,
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    model.displayName,
-                    style: TextStyle(
-                      color: manager.selectedModel == model
-                          ? Colors.white
-                          : Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
-            )),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
       onSelected: (value) {
         if (value.startsWith('model_')) {
@@ -470,7 +476,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   }
 
   Widget _buildTranscriptArea(VoiceCallManager manager) {
-    final hasTranscript = manager.assistantPartialTranscript.isNotEmpty ||
+    final hasTranscript =
+        manager.assistantPartialTranscript.isNotEmpty ||
         manager.transcripts.isNotEmpty;
 
     if (!hasTranscript) {
@@ -508,10 +515,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
             height: 1.4,
             fontFamily: null, // Uses default system font
           ),
-          child: Text(
-            displayText,
-            textAlign: TextAlign.left,
-          ),
+          child: Text(displayText, textAlign: TextAlign.left),
         ),
       ),
     );
@@ -519,17 +523,23 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
 
   Widget _buildAnimationSphere(VoiceCallManager manager) {
     final stateColor = _getStateColor(manager.state);
-    final isActive = manager.state == VoiceCallState.listening ||
+    final isActive =
+        manager.state == VoiceCallState.listening ||
         manager.state == VoiceCallState.aiSpeaking ||
         manager.state == VoiceCallState.connected;
 
-    final hasTranscript = manager.assistantPartialTranscript.isNotEmpty ||
+    final hasTranscript =
+        manager.assistantPartialTranscript.isNotEmpty ||
         manager.transcripts.isNotEmpty;
 
     final sphereSize = hasTranscript ? 120.0 : 220.0;
 
     return AnimatedBuilder(
-      animation: Listenable.merge([_rotationController, _pulseController, _glowController]),
+      animation: Listenable.merge([
+        _rotationController,
+        _pulseController,
+        _glowController,
+      ]),
       builder: (context, child) {
         final glowValue = 0.3 + (_glowController.value * 0.4);
         final pulseScale = 1.0 + (_pulseController.value * 0.05);
@@ -578,7 +588,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
                       : CustomPaint(
                           painter: ParticleSpherePainter(
                             rotationX: _rotationController.value * 2 * math.pi,
-                            rotationY: _rotationController.value * 2 * math.pi * 0.7,
+                            rotationY:
+                                _rotationController.value * 2 * math.pi * 0.7,
                             color: stateColor,
                             glowIntensity: isActive ? glowValue : 0.2,
                           ),
@@ -593,7 +604,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   }
 
   Widget _buildBottomControls(VoiceCallManager manager) {
-    final isInCall = manager.state != VoiceCallState.idle &&
+    final isInCall =
+        manager.state != VoiceCallState.idle &&
         manager.state != VoiceCallState.ended &&
         manager.state != VoiceCallState.error;
 
@@ -660,18 +672,14 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
           shape: BoxShape.circle,
           color: backgroundColor,
         ),
-        child: Icon(
-          icon,
-          color: iconColor,
-          size: 24,
-        ),
+        child: Icon(icon, color: iconColor, size: 24),
       ),
     );
   }
 }
 
 /// Custom painter that creates a 3D particle sphere effect like Perplexity
-/// 
+///
 /// This creates a sphere made of many small particles/dots that rotate
 /// and have depth-based opacity and size for a 3D effect.
 class ParticleSpherePainter extends CustomPainter {
@@ -752,11 +760,7 @@ class ParticleSpherePainter extends CustomPainter {
         );
       }
 
-      canvas.drawCircle(
-        Offset(screenX, screenY),
-        particleSize,
-        paint,
-      );
+      canvas.drawCircle(Offset(screenX, screenY), particleSize, paint);
     }
   }
 
