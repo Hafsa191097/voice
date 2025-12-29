@@ -1,5 +1,4 @@
-import 'dart:convert';
-/// Voice session configuration
+
 class VoiceSessionConfig {
   final String sessionId;
   final String model;

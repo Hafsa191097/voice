@@ -11,8 +11,8 @@ import 'voice_call_manager.dart';
 import 'voice_mode.dart';
 
 enum AnimationType {
-  particleSphere, // Custom 3D particle sphere like Perplexity
-  lottie, // Use provided Lottie animation
+  particleSphere, 
+  lottie, 
 }
 
 class VoiceCallScreen extends StatefulWidget {
@@ -62,19 +62,16 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
 
     _callManager = VoiceCallManager(baseUrl: _baseUrlController.text.trim());
 
-    // Rotation for the sphere/lottie
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
     )..repeat();
 
-    // Pulse animation for breathing effect
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    // Glow animation for ambient effect
     _glowController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -111,7 +108,6 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
         _isInitializing = false;
       });
 
-      // Auto-start the call after initialization
       _startCall();
     } catch (e) {
       setState(() {

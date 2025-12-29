@@ -1,6 +1,3 @@
-/// API Service for REST endpoints
-/// Handles authentication and session management
-library;
 
 import 'dart:convert';
 import 'dart:async';
@@ -31,14 +28,12 @@ class ApiService {
   // Token Management
   // ============================================================
 
-  /// Set authentication token
   void setToken(String token, {int expiresIn = 3600}) {
     _token = token;
     _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn));
     AppLogger.debug('Token set, expires in $expiresIn seconds');
   }
 
-  /// Clear authentication token
   void clearToken() {
     _token = null;
     _tokenExpiry = null;
@@ -47,7 +42,6 @@ class ApiService {
     AppLogger.debug('Token cleared');
   }
 
-  /// Check if token is valid
   bool get hasValidToken {
     if (_token == null || _tokenExpiry == null) return false;
     // Add 30 second buffer before expiry
@@ -74,7 +68,6 @@ class ApiService {
   // Headers
   // ============================================================
 
-  /// Get authentication headers
   Map<String, String> get _headers {
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -88,7 +81,6 @@ class ApiService {
     return headers;
   }
 
-  /// Get headers without auth (for public endpoints)
   Map<String, String> get _publicHeaders => {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -126,7 +118,6 @@ class ApiService {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final tokenResponse = TokenResponse.fromJson(data);
 
-        // Auto-set token and user info
         setToken(tokenResponse.accessToken, expiresIn: tokenResponse.expiresIn);
         _userId = userId;
         _email = email;

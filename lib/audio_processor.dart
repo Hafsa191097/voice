@@ -124,8 +124,9 @@ class AudioProcessor {
       final stream = await _recorder.startStream(config);
       _recordingSubscription = stream.listen(
         (data) {
-          if (data.isNotEmpty && _isRecordingActive)
+          if (data.isNotEmpty && _isRecordingActive) {
             onAudioRecorded?.call(data);
+          }
         },
         onError: (e) {
           _isRecordingActive = false;

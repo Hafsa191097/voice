@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
-
 import 'api.dart';
 import 'audio_processor.dart';
 import 'logger.dart';
@@ -222,7 +219,7 @@ class VoiceCallManager extends ChangeNotifier {
   // New state
   int _vadCounter = 0;
   static const int _vadFramesThreshold =
-      3; // e.g., 3 consecutive frames (~150ms)
+      3; 
   static const double _vadRmsThreshold = 0.05;
 
   // Called when audio is recorded
@@ -323,13 +320,15 @@ class VoiceCallManager extends ChangeNotifier {
   void _handleVoiceStateChanged(VoiceStateChanged event) {
     switch (event.state) {
       case VoiceConnectionState.connected:
-        if (_state == VoiceCallState.connecting)
+        if (_state == VoiceCallState.connecting) {
           _updateState(VoiceCallState.connected);
+        }
       case VoiceConnectionState.error:
         _setError(event.message ?? 'Connection error');
       case VoiceConnectionState.disconnected:
-        if (_state != VoiceCallState.ended && _state != VoiceCallState.idle)
+        if (_state != VoiceCallState.ended && _state != VoiceCallState.idle) {
           _setError('Connection lost');
+        }
       default:
         break;
     }
@@ -373,8 +372,9 @@ class VoiceCallManager extends ChangeNotifier {
   }
 
   void _handleSpeechEnded() {
-    if (_state == VoiceCallState.listening)
+    if (_state == VoiceCallState.listening) {
       _updateState(VoiceCallState.connected);
+    }
   }
 
   void _handleResponseInterrupted(VoiceResponseInterrupted event) {
